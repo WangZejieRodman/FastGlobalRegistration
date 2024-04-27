@@ -2,7 +2,7 @@
 
 Introduction
 
-input cloudpoint format ".ply" instead of feature format ".bin"
+input pointcloud format ".ply" instead of feature format ".bin"
 
 output Transformation
 
