@@ -1,4 +1,8 @@
-# Fast Global Registration
+# Fast Global Registration 
+
+Introduction
+input cloudpoint format ".ply" instead of feature format ".bin"
+output Transformation
 
 ### Windows
 
