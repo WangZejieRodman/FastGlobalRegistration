@@ -28,9 +28,19 @@
 // ----------------------------------------------------------------------------
 #include <vector>
 #include <flann/flann.hpp>
-
+#include <pcl/io/ply_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <iostream>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
+#include <pcl/features/normal_3d_omp.h>
+#include <pcl/features/fpfh_omp.h>
+#include <Eigen/Core>
+#include <vector>
+#include <stdio.h>
 
 #define DIV_FACTOR			1.4		// Division factor used for graduated non-convexity
 #define USE_ABSOLUTE_SCALE	0		// Measure distance in absolute scale (1) or in scale relative to the diameter of the model (0)
@@ -40,11 +50,17 @@
 #define TUPLE_MAX_CNT		1000	// Maximum tuple numbers.
 
 namespace fgr {
-  
+ 
+typedef pcl::PointXYZ PointT;
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloudT;
+typedef pcl::PointCloud<pcl::Normal> pointnormal;
+typedef pcl::PointCloud<pcl::FPFHSignature33> fpfhFeature;
+
 typedef std::vector<Eigen::Vector3f> Points;
 typedef std::vector<Eigen::VectorXf> Feature;
 typedef flann::Index<flann::L2<float> > KDTree;
 typedef std::vector<std::pair<int, int> > Correspondences;
+
 
 class CApp{
 public:
@@ -61,7 +77,9 @@ public:
 		tuple_scale_(tuple_scale),
 		tuple_max_cnt_(tuple_max_cnt){}
 	void LoadFeature(const Points& pts, const Feature& feat);
-	void ReadFeature(const char* filepath);
+	void ReadFeature(const char* filepath); 
+	void ReadPLY(const char* filepath);
+	void ExtractFPFH(const PointCloudT::Ptr cloud, fpfhFeature::Ptr& fpfh);
 	void NormalizePoints();
 	void AdvancedMatching();
 	Eigen::Matrix4f ReadTrans(const char* filepath);
