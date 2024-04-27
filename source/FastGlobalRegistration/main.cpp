@@ -34,12 +34,12 @@ int main(int argc, char *argv[])
 	if (argc != 4)
 	{
         printf("Usage ::\n");
-		printf("%s [feature_01] [feature_02] [transform_output_txt]\n", argv[0]);
+		printf("%s [cloud_01] [cloud_02] [transform_output_txt]\n", argv[0]);
 		return 0;
 	}
 	fgr::CApp app;
-	app.ReadFeature(argv[1]);
-	app.ReadFeature(argv[2]);
+	app.ReadPLY(argv[1]);
+	app.ReadPLY(argv[2]);
 	app.NormalizePoints();
 	app.AdvancedMatching();
 	app.OptimizePairwise(true);
