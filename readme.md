@@ -12,5 +12,5 @@ Second，use the FGR directory "...\FastGlobalRegistration-master\source\Externa
 Third，at "...\External\flann\algorithms\dist.h"， in front of line 520-522
 “HammingLUT lut;
  result = lut(reinterpret_cast<const unsigned char*>(a),
-             reinterpret_cast<const unsigned char*>(b), size * sizeof(pop_t)); ”
+             reinterpret_cast<const unsigned char*>(b), size * sizeof(pop_t)); ”，
 add “typedef unsigned long long pop_t;”
