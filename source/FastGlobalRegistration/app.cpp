@@ -28,10 +28,61 @@
 // ----------------------------------------------------------------------------
 
 #include "app.h"
+#include <pcl/io/ply_io.h>
 
 using namespace Eigen;
 using namespace std;
 using namespace fgr;
+
+
+
+void CApp::ReadPLY(const char* filepath)
+{
+	//---------------------加载点云数据------------------------------
+	PointCloudT::Ptr cloud(new PointCloudT);
+	pcl::io::loadPLYFile(filepath, *cloud);
+	Points pts;
+	pts.reserve(cloud->size());
+	for (const auto& point : *cloud) {
+		pts.push_back(Eigen::Vector3f(point.x, point.y, point.z));
+	}
+	//-----------------------提取FPFH特征——————————————————————
+	fpfhFeature::Ptr fpfh(new fpfhFeature);
+	ExtractFPFH(cloud, fpfh);
+	Feature feat;
+	feat.reserve(fpfh->points.size());
+	for (const auto& point : fpfh->points) {
+		Eigen::VectorXf feature(33); // 33是FPFH特征的维度
+		for (int i = 0; i < 33; ++i) {
+			feature[i] = point.histogram[i]; // 直接从FPFH复制数据
+		}
+		feat.push_back(feature); // 将转换后的特征向量加入列表
+	}
+	//加载点云和特征
+	LoadFeature(pts, feat);
+}
+
+void CApp::ExtractFPFH(const PointCloudT::Ptr cloud, fpfhFeature::Ptr& fpfh)
+{
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>());
+	//-------------------------法向量估计-----------------------
+	pointnormal::Ptr normals(new pointnormal);
+	pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> n;
+	n.setInputCloud(cloud);
+	n.setNumberOfThreads(16);        // 设置openMP的线程数
+	n.setKSearch(10);               // K近邻点个数
+	//n.setRadiusSearch(0.01);      // 搜索半径
+	n.compute(*normals);            // 计算法线
+	//-------------------------FPFH估计-------------------------
+	pcl::FPFHEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fest;
+	fest.setNumberOfThreads(16);     //指定8核计算
+	fest.setInputCloud(cloud);//输入点云
+	fest.setInputNormals(normals);  //输入法线
+	fest.setSearchMethod(tree);     //搜索方式
+	fest.setKSearch(10);            //K近邻点个数
+	//fest.setRadiusSearch(0.025);  //搜索半径
+	fest.compute(*fpfh);            //计算FPFH
+}
 
 void CApp::ReadFeature(const char* filepath)
 {
